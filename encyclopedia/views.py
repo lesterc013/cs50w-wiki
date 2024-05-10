@@ -40,4 +40,9 @@ def search(request):
                 "sub_list": sub_list
             })
     return render(request, "encyclopedia/index.html")
-        
+
+def newpage(request):
+    if request.method == "GET":
+        title = request.GET.get("title")
+        md_content = request.GET.get("content")
+    return render(request, "encyclopedia/newpage.html")
