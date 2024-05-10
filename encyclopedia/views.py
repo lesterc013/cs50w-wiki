@@ -45,13 +45,15 @@ def newpage(request):
     if request.method == "POST":
         title = request.POST.get("title")
         md_content = request.POST.get("content")
+        # Need to add this encode() else everytime we get the content, the markdown file's spaces will be doubled
+        encoded_content = md_content.encode()
         # Check if the title already exists
         if title.lower() in util.lowercase_title_list():
             # Return some rendering with the error message
             return render(request, "encyclopedia/newpage.html", {
                 "title": "duplicate"
             })
-        util.save_entry(title, md_content)
+        util.save_entry(title, encoded_content)
         # After the file is saved, the list however is not updated. Therefore when we use reverse, Django can't find the title to route the user. Fixed with making a method to lower case the title list automatically
         return HttpResponseRedirect(reverse("entry", kwargs={"title": title}))
     return render(request, "encyclopedia/newpage.html")
@@ -68,7 +70,8 @@ def editpage(request):
     else:
         title = request.POST.get("title")
         md_content = request.POST.get("content")
-        util.save_entry(title, md_content)
+        encoded_content = md_content.encode()
+        util.save_entry(title, encoded_content)
         return HttpResponseRedirect(reverse("entry", kwargs={"title": title}))
 
     
