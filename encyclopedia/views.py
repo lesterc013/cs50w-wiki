@@ -3,6 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 import markdown2
 from django.urls import reverse
+import random
 
 from . import util # From the same directory (aka encyclopedia) import the util module so we can use the functions defined within it
 
@@ -74,4 +75,10 @@ def editpage(request):
         util.save_entry(title, encoded_content)
         return HttpResponseRedirect(reverse("entry", kwargs={"title": title}))
 
-    
+def randompage(request):
+    title_list = util.list_entries();
+    # Get a random int from 0 to len(title_list) - 1 cos that is the last index
+    randInt = random.randint(0, len(title_list)-1)
+    # Return the title of that random int index
+    rand_title = title_list[randInt]
+    return HttpResponseRedirect(reverse("entry", kwargs={"title": rand_title}))
