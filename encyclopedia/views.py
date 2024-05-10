@@ -7,7 +7,6 @@ from django.urls import reverse
 from . import util # From the same directory (aka encyclopedia) import the util module so we can use the functions defined within it
 
 # Global title_list since multiple functions will need to use this
-title_list_lowered = [x.lower() for x in util.list_entries()]
 
 def index(request):
     return render(request, "encyclopedia/index.html", {
@@ -15,7 +14,7 @@ def index(request):
     })
 
 def entry(request, title):
-    if title.lower() in title_list_lowered:
+    if title.lower() in util.lowercase_title_list():
         entry = markdown2.markdown(util.get_entry(title)) # Gets the entry related to the title and converts from markdown to HTML
         return render(request, "encyclopedia/entry.html", {
             "title": title,
@@ -29,7 +28,7 @@ def entry(request, title):
 def search(request):
     if request.method == "GET":
         query = request.GET.get('q').lower()
-        if query in title_list_lowered:
+        if query in util.lowercase_title_list():
             return HttpResponseRedirect(reverse("entry", kwargs={"title":query}))
         else:
             sub_list = []
@@ -42,7 +41,17 @@ def search(request):
     return render(request, "encyclopedia/index.html")
 
 def newpage(request):
-    if request.method == "GET":
-        title = request.GET.get("title")
-        md_content = request.GET.get("content")
+    if request.method == "POST":
+        title = request.POST.get("title")
+        md_content = request.POST.get("content")
+        # Check if the title already exists
+        if title.lower() in util.lowercase_title_list():
+            # Return some rendering with the error message
+            return render(request, "encyclopedia/newpage.html", {
+                "title": "duplicate"
+            })
+        util.save_entry(title, md_content)
+        # After the file is saved, the list however is not updated. Therefore when we use reverse, Django can't find the title to route the user. Fixed with making a method to lower case the title list automatically
+        print(util.lowercase_title_list())
+        return HttpResponseRedirect(reverse("entry", kwargs={"title": title}))
     return render(request, "encyclopedia/newpage.html")

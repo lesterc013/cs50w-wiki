@@ -41,3 +41,7 @@ def get_entry(title):
         return f.read().decode("utf-8")
     except FileNotFoundError:
         return None
+
+def lowercase_title_list():
+    title_list_lowered = [x.lower() for x in list_entries()]
+    return title_list_lowered
