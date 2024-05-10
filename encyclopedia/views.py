@@ -14,6 +14,7 @@ def index(request):
     })
 
 def entry(request, title):
+    print("Entry Function")
     if title.lower() in util.lowercase_title_list():
         entry = markdown2.markdown(util.get_entry(title)) # Gets the entry related to the title and converts from markdown to HTML
         return render(request, "encyclopedia/entry.html", {
@@ -52,6 +53,22 @@ def newpage(request):
             })
         util.save_entry(title, md_content)
         # After the file is saved, the list however is not updated. Therefore when we use reverse, Django can't find the title to route the user. Fixed with making a method to lower case the title list automatically
-        print(util.lowercase_title_list())
         return HttpResponseRedirect(reverse("entry", kwargs={"title": title}))
     return render(request, "encyclopedia/newpage.html")
+
+def editpage(request):
+    if request.method == "GET":
+        title = request.GET.get("title")
+        print(title)
+        md_content = util.get_entry(title)
+        return render(request, "encyclopedia/editpage.html", {
+            "title": title,
+            "content": md_content
+        })
+    else:
+        title = request.POST.get("title")
+        md_content = request.POST.get("content")
+        util.save_entry(title, md_content)
+        return HttpResponseRedirect(reverse("entry", kwargs={"title": title}))
+
+    

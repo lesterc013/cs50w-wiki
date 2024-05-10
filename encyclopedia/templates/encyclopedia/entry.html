@@ -6,4 +6,8 @@
 
 {% block body %}
     {{ entry|safe }}
+    <form action="{% url 'editpage' %}" method="GET">
+        <input type="hidden" name="title" value="{{ title }}">
+        <input type="submit" value="Edit Page">
+    </form>
 {% endblock %}
