@@ -9,7 +9,7 @@
     <form action="{% url 'editpage' %}" method="POST">
         {% csrf_token %}
         <h3>{{ title }}</h3>
-        <p><textarea name="content">{{ content }}</textarea></p>
+        {{ form }}
         <input type="hidden" value="{{ title }}" name="title">
         <input type="submit" value="Save Edits">
     </form>

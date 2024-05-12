@@ -4,6 +4,7 @@ from django.shortcuts import render
 import markdown2
 from django.urls import reverse
 import random
+from django import forms
 
 from . import util # From the same directory (aka encyclopedia) import the util module so we can use the functions defined within it
 
@@ -59,21 +60,19 @@ def newpage(request):
         return HttpResponseRedirect(reverse("entry", kwargs={"title": title}))
     return render(request, "encyclopedia/newpage.html")
 
+class EditPageForm(forms.Form):
+    content = forms.CharField(label="Edit Content", widget=forms.Textarea)
+
 def editpage(request):
     if request.method == "GET":
         title = request.GET.get("title")
-        print(title)
-        md_content = util.get_entry(title)
+        content = util.get_entry(title)
+        editPageForm = EditPageForm(initial=content)
         return render(request, "encyclopedia/editpage.html", {
             "title": title,
-            "content": md_content
+            "form": editPageForm
         })
-    else:
-        title = request.POST.get("title")
-        md_content = request.POST.get("content")
-        encoded_content = md_content.encode()
-        util.save_entry(title, encoded_content)
-        return HttpResponseRedirect(reverse("entry", kwargs={"title": title}))
+
 
 def randompage(request):
     title_list = util.list_entries();
