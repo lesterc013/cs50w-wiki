@@ -8,8 +8,6 @@ from django import forms
 
 from . import util # From the same directory (aka encyclopedia) import the util module so we can use the functions defined within it
 
-# Global title_list since multiple functions will need to use this
-
 def index(request):
     return render(request, "encyclopedia/index.html", {
         "entries": util.list_entries()
@@ -61,18 +59,44 @@ def newpage(request):
     return render(request, "encyclopedia/newpage.html")
 
 class EditPageForm(forms.Form):
-    content = forms.CharField(label="Edit Content", widget=forms.Textarea)
+    content = forms.CharField(label="", widget=forms.Textarea)
 
 def editpage(request):
     if request.method == "GET":
+        print(type(request))
         title = request.GET.get("title")
         content = util.get_entry(title)
-        editPageForm = EditPageForm(initial=content)
+        editPageForm = EditPageForm(initial={"content": content})
         return render(request, "encyclopedia/editpage.html", {
             "title": title,
             "form": editPageForm
         })
+    else:
+        editPageForm = EditPageForm(request.POST)
+        if editPageForm.is_valid():
+            title = request.POST.get("title")
+            print(title)
+            content = editPageForm.cleaned_data["content"].encode()
+            print(content)
+            util.save_entry(title, content)
+            return HttpResponseRedirect(reverse("entry", kwargs={"title": title}))
 
+
+# def editpage(request):
+#     if request.method == "GET":
+#         title = request.GET.get("title")
+#         print(title)
+#         md_content = util.get_entry(title)
+#         return render(request, "encyclopedia/editpage.html", {
+#             "title": title,
+#             "content": md_content
+#         })
+#     else:
+#         title = request.POST.get("title")
+#         md_content = request.POST.get("content")
+#         encoded_content = md_content.encode()
+#         util.save_entry(title, encoded_content)
+#         return HttpResponseRedirect(reverse("entry", kwargs={"title": title}))
 
 def randompage(request):
     title_list = util.list_entries();
